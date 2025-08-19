@@ -2,107 +2,50 @@
   padding: 0;
   margin: 0;
 }
-.container {
-  width: 280px;
-  height: 400px;
-  margin: 100px auto;
-  /* outline: 1px solid red; */
+.chess-container {
+  width: 600px;
+  height: 600px;
+  border: 2px solid lightgray;
+  margin: 30px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(243, 226, 174);
 }
-.changeImg {
-  text-align: center;
-  font-size: 16px;
-  color: rgb(115, 18, 199);
-  font-weight: bolder;
+
+.chessBoard {
+  width: 92%;
+  height: 92%;
+  border: 1px solid #000;
+  border-collapse: collapse;
+}
+
+.chessBoard td {
+  border: 1px solid #000;
   position: relative;
-  cursor: pointer;
-  user-select: none;
-  margin-bottom: 20px;
-  /* outline: 1px solid red; */
 }
-.changeImg::before {
-  content: "";
-  display: block;
-  width: 26px;
-  height: 26px;
-  background: rgb(59, 141, 213) url(../images/change.png) no-repeat;
-  background-size: 60% 60%;
-  background-position: center;
+.chess {
+  position: absolute;
+  width: 90%;
+  height: 90%;
   border-radius: 50%;
-  position: absolute;
-  top: calc(50%-13px);
-  left: 10%;
-  transform: rotate(45deg);
-}
-.imageBox-wrapper {
-  width: 100%;
-  height: 320px;
-  border-radius: 15px;
-  border: 1px solid #adadad;
-  box-shadow: 0 0 2px #adadad;
-  padding: 15px;
-  box-sizing: border-box;
-}
-.imageBox-wrapper h3 {
-  color: #000;
-  text-align: center;
-  margin-bottom: 10px;
-}
-.imageBox-wrapper .imageBox {
-  width: 100%;
-  height: 200px;
-  /* outline: 1px solid red; */
-  background-repeat: no-repeat;
-  position: relative;
-}
-.imageBox .imageBlock {
-  position: absolute;
-  width: 51px;
-  height: 50px;
-  /* outline: 1px solid red; */
-  background-repeat: no-repeat;
-
-  z-index: 20;
-}
-
-.imageBox .imageGap {
-  width: 50px;
-  height: 50px;
-  position: absolute;
-  background-color: #fff;
-  box-shadow: 0 0 3px #adadad;
-}
-.slider {
-  margin-top: 15px;
-  width: 100%;
-  height: 30px;
-  border-radius: 10px;
-  background-color: #ddd;
+  border: 1px solid lightgray;
+  top: -50%;
+  left: -50%;
   font-size: 14px;
-  line-height: 30px;
-  font-weight: 300;
-  text-align: center;
-  position: relative;
+  color: lightgray;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.slider button {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgb(59, 141, 213) url(../images/sliderBtn.png) no-repeat;
-  background-size: 105%;
-  background-position: center;
-  position: absolute;
-  border: 1px solid #ddd;
-  box-sizing: border-box;
-  left: -2px;
-  top: -4px;
-  cursor: pointer;
-}
-.slider .btn-shadow {
-  position: absolute;
-  width: 40px;
-  height: 40px;
+.white {
   background-color: #fff;
-  border-radius: 50%;
-  top: -5px;
-  left: -1px;
+}
+.black {
+  background-color: black;
+}
+.win {
+  border: 1px solid red;
+  box-shadow: 0 0 3px red;
 }

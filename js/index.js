@@ -1,113 +1,286 @@
-// 准备数据
+function main() {
+  // 绘制棋盘
+  initChessBoard();
+  // 绑定事件
+  bindEvent();
+}
+
 function $(selector) {
   return document.querySelector(selector);
 }
-var doms = {
-  changeImg: $(".changeImg"),
-  title: $(".title"),
-  imageBox: $(".imageBox"),
-  imageBlock: $(".imageBlock"),
-  imageGap: $(".imageGap"),
-  slider: $(".slider"),
-  sliderText: $(".sliderText"),
-  sliderBtn: $(".sliderBtn"),
-  sliderBtnShadow: $(".btn-shadow"),
-};
-var imgArr = [
-  "./images/0.png",
-  "./images/1.png",
-  "./images/2.png",
-  "./images/3.png",
-  "./images/4.png",
-  "./images/5.png",
-  "./images/6.png",
-];
-function getRandom(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+var chessBoardDOM = $(".chessBoard");
+// 游戏是否结束
+var isGameOver = false;
+// 棋子颜色
+var chessColor = "white";
+// 已经有的棋子
+var chessArr = [];
+function initChessBoard() {
+  var tableContent = "";
+  // 绘制表格
+  for (var i = 0; i < 14; i++) {
+    var row = `<tr>`;
+    for (var j = 0; j < 14; j++) {
+      row += `<td data-row='${i}' data-line='${j}'></td>`;
+    }
+    row += "</tr>";
+    tableContent += row;
+  }
+  chessBoardDOM.innerHTML = tableContent;
 }
-function initEvent() {
-  doms.imageBlock.style.opacity = 0;
-  doms.sliderBtn.style = "-2px";
-  doms.sliderBtnShadow.style = "-1px";
-  doms.title.innerHTML = "请完成图片验证";
-  doms.title.style.color = "#000";
-  doms.imageBlock.style.transition = "";
-  doms.sliderBtn.style.transition = "";
-  doms.sliderBtnShadow.style.transition = "";
 
-  // 刷新背景图片随机切换
-  var randomImg = getRandom(0, imgArr.length - 1);
-  doms.imageBox.style.backgroundImage = `url(${imgArr[randomImg]})`;
-  doms.imageBlock.style.backgroundImage = `url(${imgArr[randomImg]})`;
-  // 空缺色块的位置出现在后半部分
-  var maxTop = doms.imageBox.offsetHeight - doms.imageGap.offsetHeight;
-  var maxLeft = doms.imageBox.offsetWidth / 2 - doms.imageGap.offsetWidth;
-  var left = getRandom(0, maxLeft) + doms.imageBox.offsetWidth / 2;
-  var top = getRandom(0, maxTop);
-  doms.imageGap.style.top = top + "px";
-  doms.imageGap.style.left = left - 1 + "px";
+function bindEvent() {
+  chessBoardDOM.onclick = function (e) {
+    if (!isGameOver) {
+      var chessTemp = Object.assign({}, e.target.dataset);
+      if (e.target.tagName === "TD") {
+        // 判断棋子落下的位置  左上 左下 右上 右下
+        var tdW = (chessBoardDOM.clientWidth * 0.92) / 14;
+        var positionX = e.offsetX > tdW / 2;
+        var positionY = e.offsetY > tdW / 2;
+        var chessPoint = {
+          x: positionX
+            ? parseInt(chessTemp.line) + 1
+            : parseInt(chessTemp.line),
+          y: positionY ? parseInt(chessTemp.row) + 1 : parseInt(chessTemp.row),
+          c: chessColor,
+        };
 
-  // 让移动色块的背景与缺块相吻合
-  doms.imageBlock.style.backgroundPosition = `-${left - 1}px -${top + 2}px`;
-  // 移动色块的位置
-  doms.imageBlock.style.top = top + "px";
-  doms.imageBlock.style.left = "0px";
-
-  // 绑定事件
-  doms.sliderBtn.onmousedown = function (e) {
-    doms.imageBlock.style.transition = "";
-    doms.sliderBtn.style.transition = "";
-    doms.sliderBtnShadow.style.transition = "";
-    console.log("mousedown");
-    doms.imageBlock.style.opacity = 1;
-    doms.slider.onmousemove = function (ev) {
-      console.log("mousemove");
-      var left = ev.clientX - doms.imageBox.offsetLeft - e.offsetX;
-      var maxLeft = doms.slider.offsetWidth - doms.imageBlock.offsetWidth;
-      if (left < -2) {
-        left = -2;
+        // 绘制棋子
+        paintChess(chessPoint);
       }
-      if (left > maxLeft) {
-        left = maxLeft;
+    } else {
+      // 游戏已经结束
+      if (window.confirm("是否要重新开一局？")) {
+        initChessBoard();
+        isGameOver = false;
+        chessArr = [];
       }
-      doms.sliderBtn.style.left = left + "px";
-      doms.sliderBtnShadow.style.left = left + "px";
-      doms.sliderText.style.opacity = 0;
-      doms.imageBlock.style.left = left + "px";
-      // 监听鼠标松开
-      document.onmouseup = function () {
-        console.log("mouseup");
-        // 判断移动色块和空白色块的left差值，设置成功或者失败
-        var disX = doms.imageGap.offsetLeft - doms.imageBlock.offsetLeft;
-        if (disX < -5 || disX > 5) {
-          // 验证失败，色块回弹
-          doms.imageBlock.style.left = "0px";
-          doms.imageBlock.style.transition = "all .5s";
-          doms.sliderBtn.style.left = "-2px";
-          doms.sliderBtnShadow.style.left = "-1px";
-          doms.sliderBtn.style.transition = "all .5s";
-          doms.sliderBtnShadow.style.transition = "all .5s";
-          doms.sliderText.style.opacity = 1;
-          doms.slider.onmousemove = document.onmouseup = null;
-          // 设置验证失败文字
-          doms.title.innerHTML = "验证失败";
-          doms.title.style.color = "green";
-        } else {
-          // 差值在范围内，验证成功，移除所有事件
-          doms.sliderBtn.onmousedown =
-            doms.slider.onmousemove =
-            document.onmouseup =
-              null;
-          doms.title.innerHTML = "验证成功";
-          doms.title.style.color = "red";
-          doms.imageBlock.style.transition = "";
-          doms.sliderBtn.style.transition = "";
-          doms.sliderBtnShadow.style.transition = "";
-        }
-      };
-    };
+    }
   };
 }
-initEvent();
-// 绑定事件，更换图片
-doms.changeImg.onclick = initEvent;
+
+function paintChess(chessPoint) {
+  // 绘制之前先判断，有没有棋子
+  if (existChess(chessPoint) && !isGameOver) {
+    // 此位置还没绘制棋子且游戏没结束
+    var newChess = `<div class='chess ${chessPoint.c}' data-row='${chessPoint.y}' data-line='${chessPoint.x}'></div>`;
+
+    // 根据不同的位置调整棋子，情况：最后一列的棋子（最右下角容纳四个棋子）/ 最后一行棋子 / 最右下角的棋子
+
+    // 中间的棋子
+    if (chessPoint.x < 14 && chessPoint.y < 14) {
+      var td = $(`td[data-row='${chessPoint.y}'][data-line='${chessPoint.x}']`);
+      td.innerHTML += newChess;
+    }
+    // 最后一列的棋子
+    if (chessPoint.x === 14 && chessPoint.y < 14) {
+      var td = $(`td[data-row='${chessPoint.y}'][data-line='13']`);
+      td.innerHTML += newChess;
+      td.lastChild.style.left = "50%";
+    }
+    // 最后一行的棋子
+    if (chessPoint.x < 14 && chessPoint.y === 14) {
+      var td = $(`td[data-row='13'][data-line='${chessPoint.x}']`);
+      td.innerHTML += newChess;
+      td.lastChild.style.top = "50%";
+    }
+    // 最右下角 有4个棋子
+    if (chessPoint.x === 14 && chessPoint.y === 14) {
+      var td = $(`td[data-row='13'][data-line='13']`);
+      td.innerHTML += newChess;
+      td.lastChild.style.top = "50%";
+      td.lastChild.style.left = "50%";
+    }
+
+    chessArr.push(chessPoint);
+    chessColor = chessColor === "white" ? "black" : "white";
+    // 每下一颗棋子就要判断赢了吗
+    checkWin();
+  }
+}
+function existChess(chessPoint) {
+  var result = chessArr.find(function (item) {
+    return chessPoint.x === item.x && chessPoint.y === item.y;
+  });
+  return result === undefined ? true : false;
+}
+
+function checkWin() {
+  console.log("win");
+  // 4种情况：横着5个 / 竖着5个 / 正斜5个 / 反斜5个
+
+  // 1. 横着5个
+  for (var i = 0; i < chessArr.length; i++) {
+    var curChess = chessArr[i];
+    var chess2, chess3, chess4, chess5;
+    chess2 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 1 &&
+        curChess.y === item.y &&
+        curChess.c === item.c
+      );
+    });
+    chess3 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 2 &&
+        curChess.y === item.y &&
+        curChess.c === item.c
+      );
+    });
+    chess4 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 3 &&
+        curChess.y === item.y &&
+        curChess.c === item.c
+      );
+    });
+    chess5 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 4 &&
+        curChess.y === item.y &&
+        curChess.c === item.c
+      );
+    });
+
+    if (chess2 && chess3 && chess4 && chess5) {
+      console.log("横着");
+      return end(curChess, chess2, chess3, chess4, chess5);
+    }
+  }
+  // 2. 竖着5个
+  for (var i = 0; i < chessArr.length; i++) {
+    var curChess = chessArr[i];
+    var chess2, chess3, chess4, chess5;
+    chess2 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x &&
+        curChess.y === item.y + 1 &&
+        curChess.c === item.c
+      );
+    });
+    chess3 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x &&
+        curChess.y === item.y + 2 &&
+        curChess.c === item.c
+      );
+    });
+    chess4 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x &&
+        curChess.y === item.y + 3 &&
+        curChess.c === item.c
+      );
+    });
+    chess5 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x &&
+        curChess.y === item.y + 4 &&
+        curChess.c === item.c
+      );
+    });
+    // console.log(chessArr);
+    // console.log(chess2, chess3, chess5);
+    if (chess2 && chess3 && chess4 && chess5) {
+      console.log("竖着");
+      return end(curChess, chess2, chess3, chess4, chess5);
+    }
+  }
+  // 正斜5个
+  for (var i = 0; i < chessArr.length; i++) {
+    var curChess = chessArr[i];
+    var chess2, chess3, chess4, chess5;
+    chess2 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 1 &&
+        curChess.y === item.y - 1 &&
+        curChess.c === item.c
+      );
+    });
+    chess3 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 2 &&
+        curChess.y === item.y - 2 &&
+        curChess.c === item.c
+      );
+    });
+    chess4 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 3 &&
+        curChess.y === item.y - 3 &&
+        curChess.c === item.c
+      );
+    });
+    chess5 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x + 4 &&
+        curChess.y === item.y - 4 &&
+        curChess.c === item.c
+      );
+    });
+
+    if (chess2 && chess3 && chess4 && chess5) {
+      console.log("正斜");
+      return end(curChess, chess2, chess3, chess4, chess5);
+    }
+  }
+  // 反斜5个
+  for (var i = 0; i < chessArr.length; i++) {
+    var curChess = chessArr[i];
+    var chess2, chess3, chess4, chess5;
+    chess2 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x - 1 &&
+        curChess.y === item.y - 1 &&
+        curChess.c === item.c
+      );
+    });
+    chess3 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x - 2 &&
+        curChess.y === item.y - 2 &&
+        curChess.c === item.c
+      );
+    });
+    chess4 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x - 3 &&
+        curChess.y === item.y - 3 &&
+        curChess.c === item.c
+      );
+    });
+    chess5 = chessArr.find(function (item) {
+      return (
+        curChess.x === item.x - 4 &&
+        curChess.y === item.y - 4 &&
+        curChess.c === item.c
+      );
+    });
+
+    if (chess2 && chess3 && chess4 && chess5) {
+      console.log("反斜");
+      return end(curChess, chess2, chess3, chess4, chess5);
+    }
+  }
+}
+function end() {
+  if (!isGameOver) {
+    isGameOver = true;
+    // 给所有棋子标上序号
+    for (var i = 0; i < chessArr.length; i++) {
+      var chessItem = chessArr[i];
+      $(
+        `div[data-row='${chessItem.y}'][data-line='${chessItem.x}']`
+      ).innerHTML = i + 1;
+    }
+    // 给连续的5个棋子加上边框
+    for (var i = 0; i < arguments.length; i++) {
+      var chessWin = arguments[i];
+      $(
+        `div[data-row='${chessWin.y}'][data-line='${chessWin.x}']`
+      ).classList.add("win");
+    }
+  }
+}
+main();
